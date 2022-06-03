@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>GPS Espacial</title>
+    <script src="https://cdn.plot.ly/plotly-2.11.1.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js'></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}" />
+
+    <script>
+        async function Planeta(){
+            let planeta = document.getElementById('Planeta').value;
+            let salida = document.getElementById('inicio').value
+            let llegada = document.getElementById('fin').value
+
+            const response = await fetch(`http://127.0.0.1:5000/orbita_planeta/${planeta}/${salida}/${llegada}`);
+            const data = await response.json();
+
+            Plotly.addTraces('chart',[{
+                type: 'scatter3d',
+                mode: 'lines',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                name:'Orbita de '+ planeta
+            }])
+            Plotly.addTraces('chart',[{
+                type: 'scatter3d',
+                mode: 'markers',
+                x:[data.r0[0]],
+                y:[data.r0[1]],
+                z:[data.r0[2]],
+                marker:{
+                    size: 12,
+                    symbol: 'circle'
+                },
+                name:'Posicion inicial ' + planeta
+            }])
+            Plotly.addTraces('chart',[{
+                type: 'scatter3d',
+                mode: 'markers',
+                x:[data.rf[0]],
+                y:[data.rf[1]],
+                z:[data.rf[2]],
+                marker:{
+                    size: 12,
+                    symbol: 'circle'
+                },
+                name:'Posicion final ' + planeta
+            }])
+        }
+
+        async function maniobra1(){
+            let planeta1 = document.getElementById('Planeta1').value
+            let planeta2 = document.getElementById('Planeta2').value
+            let salida = document.getElementById('inicio').value
+            let llegada = document.getElementById('fin').value
+
+            const response = await fetch(`http://127.0.0.1:5000/maniobra/${planeta1}/${planeta2}/${salida}/${llegada}`);
+            const data = await response.json();
+
+            Plotly.addTraces('chart',[{
+                type: 'scatter3d',
+                mode: 'lines',
+                x: data.man[0],
+                y: data.man[1],
+                z: data.man[2],
+                name: 'maniobra'
+            }])
+        }
+
+    </script>
+</head>
+<body>
+    <div class="row">
+        <div class="col-3 bordes-solidos">
+            <h1>Parametros</h1>
+            <h5>Dia y hora de salida</h5>
+            <input type="datetime-local" id="inicio">
+            <h5>Dia y hora de llegada</h5>
+            <input type="datetime-local" id="fin">
+            <h5>Escoja Planetas</h5>
+            <select id="Planeta">
+                <option value="Mercury">Mercurio</option>
+                <option value="Venus">Venus</option>
+                <option value="Earth">Tierra</option>
+                <option value="Mars">Marte</option>
+                <option value="Jupiter">Jupiter</option>
+                <option value="Saturn">Saturno</option>
+                <option value="Uranus">Urano</option>
+                <option value="Neptune">Neptuno</option>
+                <option value="Pluto">Pluton</option>
+            </select>
+            <input type="button" value="orbita del planeta" onclick="Planeta()">
+            <h5>Viaje</h5>
+            <h5>Escoja planeta de partida y destino</h5>
+            <label>Planeta de partida</label>
+            <select id="Planeta1">
+                <option value="Mercury">Mercurio</option>
+                <option value="Venus">Venus</option>
+                <option value="Earth">Tierra</option>
+                <option value="Mars">Marte</option>
+                <option value="Jupiter">Jupiter</option>
+                <option value="Saturn">Saturno</option>
+                <option value="Uranus">Urano</option>
+                <option value="Neptune">Neptuno</option>
+                <option value="Pluto">Pluton</option>
+            </select>
+            <br><label>Planeta de destino</label>
+            <select id="Planeta2">
+                <option value="Mercury">Mercurio</option>
+                <option value="Venus">Venus</option>
+                <option value="Earth">Tierra</option>
+                <option value="Mars">Marte</option>
+                <option value="Jupiter">Jupiter</option>
+                <option value="Saturn">Saturno</option>
+                <option value="Uranus">Urano</option>
+                <option value="Neptune">Neptuno</option>
+                <option value="Pluto">Pluton</option>
+            </select>
+            <input type="button" value="submit" onclick="maniobra1()">
+            <br><br><br><input type="button" value="Eliminar Planeta" onclick="borrar()">
+
+
+        </div>
+        <div id="chart" class="col-9 bordes-solidos">
+            <svg height="900"></svg>
+        </div>
+
+    </div>
+    <script id="Sol">
+        Plotly.newPlot('chart', [{
+            type:'scatter3d',
+            mode: 'markers',
+            x: [0],
+            y: [0],
+            z: [0],
+            marker:{
+                color: 'yellow',
+                size:20,
+                symbol: 'circle',
+            },
+            name:'Sol'
+        }])
+        function borrar(){
+            Plotly.deleteTraces('chart',[1])
+        }
+    </script>
+</body>
+</html>
